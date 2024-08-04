@@ -124,17 +124,11 @@ int initialize_clusters()
 
 int transform_centroids(PyObject *cent_list, double** final_centroids){
     int i, j;
-    size_t vect_len, t_i, t_j;
-    Py_ssize_t py_len, pos_i, pos_j;
     PyObject* centroid_i;
     PyObject* item_j;
-    vect_len = vector_length;
-    py_len = (Py_ssize_t)vect_len;
     for (i = 0; i < K; i++)
     {
-        t_i = i;
-        pos_i = (Py_ssize_t)t_i;
-        centroid_i =  PyList_New(vect_len);
+        centroid_i =  PyList_New(vector_length);
         if (!PyList_Check(centroid_i)) 
         {
             printf("Entered if failure in line : %d \n", __LINE__);
@@ -142,12 +136,9 @@ int transform_centroids(PyObject *cent_list, double** final_centroids){
         }
         for (j = 0; j < vector_length; j++)
         {
-            t_j = j;
-            pos_j = (Py_ssize_t)t_j;
             item_j = Py_BuildValue("d", final_centroids[i][j]);
             if (!item_j) 
             {
-                printf("Entered if failure in line : %d \n", __LINE__);
                 return 1;
             }
             PyList_SetItem(centroid_i, j, item_j);
@@ -160,8 +151,6 @@ int transform_centroids(PyObject *cent_list, double** final_centroids){
 int create_vector_array(PyObject *lst_data_points)
 {
     int i, j;
-    size_t t_i, t_j;
-    Py_ssize_t pos_i, pos_j;
     double value;
     PyObject* item;
     PyObject* vect;
@@ -169,19 +158,15 @@ int create_vector_array(PyObject *lst_data_points)
     vector_array = (double**)calloc(vectors_count, sizeof(double*));
     if (vector_array == NULL) 
     {
-        printf("Entered if failure in line : %d \n", __LINE__);
         printf(ERR_MSG);
         return 1;
     }
     malloc_count++;
     for (i = 0; i < vectors_count; i++)
     {
-        t_i = i;
-        pos_i = (Py_ssize_t)t_i;
         vector_i = (double *)calloc(vector_length, sizeof(double));
         if (vector_i == NULL) 
         {
-            printf("Entered if failure in line : %d \n", __LINE__);
             printf(ERR_MSG);
             free_memory_of_vectors_array(i);
             return 1;
@@ -190,8 +175,6 @@ int create_vector_array(PyObject *lst_data_points)
         vect = PyList_GetItem(lst_data_points, i);
         for (j = 0; j < vector_length; j++) 
         {
-            t_j = j;
-            pos_j = (Py_ssize_t)t_j;
             item = PyList_GetItem(vect, j);
             value = PyFloat_AsDouble(item);
             vector_i[j] = value;
@@ -204,8 +187,6 @@ int create_vector_array(PyObject *lst_data_points)
 int create_initial_centroids(PyObject *lst_centroids)
 {
     int i, j;
-    size_t t_i, t_j;
-    Py_ssize_t pos_i, pos_j;
     double value;
     PyObject *item;
     PyObject *cent;
@@ -218,8 +199,6 @@ int create_initial_centroids(PyObject *lst_centroids)
     malloc_count++;
     for (i = 0; i < K; i++)
     {
-        t_i = i;
-        pos_i = (Py_ssize_t)t_i;
         initial_centroids[i] = (double *)calloc(K, sizeof(double));
         if (initial_centroids[i] == NULL) 
         {
@@ -239,8 +218,6 @@ int create_initial_centroids(PyObject *lst_centroids)
         }
         for (j = 0; j < vector_length; j++) 
         {
-            t_j = j;
-            pos_j = (Py_ssize_t)t_j;
             item = PyList_GetItem(cent, j);
             if (!PyFloat_Check(item)) 
             {
@@ -452,9 +429,6 @@ static PyObject* fit(PyObject *self, PyObject *args)
     PyObject *lst_centroids;
     PyObject *lst_data_points;
     PyObject *cent_list;
-    size_t t_k;
-    Py_ssize_t size_k;
-    int i;
     malloc_count = 0;
     free_count = 0;
     if(!PyArg_ParseTuple(args, "iiidOO", &K, &iter_limit, &vector_length, &epsilon, &lst_centroids, &lst_data_points)) 
@@ -479,8 +453,6 @@ static PyObject* fit(PyObject *self, PyObject *args)
         printf("Entered if failure in line : %d \n", __LINE__);
         return Py_BuildValue("i", failure);
     }
-    t_k = K;
-    size_k = (Py_ssize_t)t_k;
     cent_list =  PyList_New(K);
     if (!PyList_Check(cent_list)) 
     {
