@@ -117,28 +117,27 @@ def parse_arguments():
 
 def main():
     K, iter_limit, epsilon, file_name1, file_name2 = parse_arguments()
-    try:
-        data_points = validity_check(K, iter_limit, epsilon, file_name1, file_name2)
-        if isinstance(data_points, int):
-            return
-        data_points = data_points.iloc[:, 1:].to_numpy()
-        K = int(float(K))
-        iter_limit = int(float(iter_limit))
-        epsilon = float(epsilon)
-        initialization_centroids, indices = kmeans_plus_initialization(data_points, K)
-        vector_len = len(initialization_centroids[0])
-        data_points = data_points.tolist()
-        final_centroids = c.fit(K, iter_limit, vector_len, epsilon, initialization_centroids, data_points)
-        if final_centroids == 1:
-            print("An Error Has Occurred")
-        else:
-            print(",".join(str(index) for index in indices))
-            for centroid in final_centroids:
-                print(",".join(str("%.4f" % element) for element in centroid))
-    except Exception as e:
+    # try:
+    data_points = validity_check(K, iter_limit, epsilon, file_name1, file_name2)
+    if isinstance(data_points, int):
+        return
+    data_points = data_points.iloc[:, 1:].to_numpy()
+    K = int(float(K))
+    iter_limit = int(float(iter_limit))
+    epsilon = float(epsilon)
+    initialization_centroids, indices = kmeans_plus_initialization(data_points, K)
+    vector_len = len(initialization_centroids[0])
+    data_points = data_points.tolist()
+    final_centroids = c.fit(K, iter_limit, vector_len, epsilon, initialization_centroids, data_points)
+    if final_centroids == 1:
         print("An Error Has Occurred")
+    else:
+        print(",".join(str(index) for index in indices))
+        for centroid in final_centroids:
+            print(",".join(str("%.4f" % element) for element in centroid))
+    # except Exception as e:
+    #     print("An Error Has Occurred")
 
-    print("")
 if __name__ == "__main__":
     main()
 
