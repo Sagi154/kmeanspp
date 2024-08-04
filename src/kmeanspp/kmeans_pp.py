@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import math
 import mykmeanssp as c
+np.random.seed(1234)
 
 def combine_inputs(file_name1, file_name2):
     data_points1 = pd.read_csv(file_name1, header=None)
@@ -18,21 +19,18 @@ def combine_inputs(file_name1, file_name2):
     combined_data_points = combined_data_points.sort_values(by='key', ascending=True)
     return combined_data_points
 
-
 def kmeans_plus_initialization(data_points, K):
     centroids = []
     centroids_indices = []
     indices = [i for i in range(len(data_points))]
     new_centroid_index = np.random.randint(0, len(data_points) - 1)
-    centroids.append(data_points[data_points[new_centroid_index]])
+    centroids.append(data_points[new_centroid_index].tolist())
     centroids_indices.append(new_centroid_index)
-    print(centroids[0])
 
     for i in range(K-1):
         new_centroid_index = find_new_centroid(data_points, centroids, indices)
-        centroids.append(data_points[new_centroid_index])
+        centroids.append(data_points[new_centroid_index].tolist())
         centroids_indices.append(new_centroid_index)
-        print(data_points[new_centroid_index])
     return centroids, centroids_indices
 
 
@@ -129,18 +127,18 @@ def main():
         epsilon = float(epsilon)
         initialization_centroids, indices = kmeans_plus_initialization(data_points, K)
         vector_len = len(initialization_centroids[0])
+        data_points = data_points.tolist()
         final_centroids = c.fit(K, iter_limit, vector_len, epsilon, initialization_centroids, data_points)
-        if final_centroids:
+        if final_centroids == 1:
             print("An Error Has Occurred")
         else:
-            print(indices)
-            print(final_centroids)
-        """
-        Call C code and do shit
-        """
+            print(",".join(str(index) for index in indices))
+            for centroid in final_centroids:
+                print(",".join(str("%.4f" % element) for element in centroid))
     except Exception as e:
         print("An Error Has Occurred")
 
-
+    print("")
 if __name__ == "__main__":
     main()
+
