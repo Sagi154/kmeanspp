@@ -380,8 +380,8 @@ int k_means()
                     flag = 0;
                 }
             }
-            free(prev_cluster_centroid);
-            free_count++;
+            // free(prev_cluster_centroid);
+            // free_count++;
             reset_sum_and_size(&clusters[j]);
         }
     }
