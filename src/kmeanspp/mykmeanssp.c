@@ -1,9 +1,10 @@
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
+
 # include <stdio.h>
 # include <stdlib.h>
 # include <math.h>
-# include <Python.h>
 
-# define PY_SSIZE_T_CLEAN
 # define ERR_MSG "An Error Has Occurred\n"
 # define DBL_MAX 1.7976931348623157e+308
 
@@ -399,6 +400,29 @@ void print_centroids()
 
 static PyObject* fit(PyObject *self, PyObject *args)
 {
+    /**
+ * @brief Fits the k-means clustering algorithm to the given data points and centroids.
+ *
+ * This function initializes and runs the k-means clustering algorithm using the provided data points and initial centroids.
+ * It parses the input arguments, processes the data, and returns the final centroids of the clusters.
+ *
+ * @param self The reference to the module (not used in this function).
+ * @param args A tuple containing the following parameters:
+ *             - int K: The number of clusters.
+ *             - int iter_limit: The maximum number of iterations for the algorithm.
+ *             - int vector_length: The length of each data vector.
+ *             - double epsilon: The convergence criterion for the algorithm.
+ *             - list lst_centroids: A list of initial centroids, where each centroid is represented as a list of doubles.
+ *             - list lst_data_points: A list of data points, where each data point is represented as a list of doubles.
+ *
+ * @return A list of final centroids, where each centroid is represented as a list of doubles. If an error occurs,
+ *         it returns an integer indicating the failure status:
+ *         - 0: Success
+ *         - 1: Error in processing
+ *
+ * @note This function expects to receive valid input types and dimensions as described. The input lists should be
+ *       structured correctly, and all values should be of the expected types to avoid errors.
+ */
     PyObject *lst_centroids;
     PyObject *lst_data_points;
     PyObject *cent_list;
@@ -444,7 +468,27 @@ static PyMethodDef kmeansMethods[] = {
         "fit",                   /* the Python method name that will be used */
         fit, /* the C-function that implements the Python function and returns static PyObject*  */
         METH_VARARGS,           /* flags indicating parameters accepted for this function */
-        "A Method that implements the kmeans algorithm"}, /*  The docstring for the function */
+        "Fit the k-means clustering algorithm to the given data points and centroids.\n"
+        "\n"
+        "This function initializes and runs the k-means clustering algorithm using the provided data points and initial centroids.\n"
+        "It parses the input arguments, processes the data, and returns the final centroids of the clusters.\n"
+        "\n"
+        "@param self The reference to the module (not used in this function).\n"
+        "@param args A tuple containing the following parameters:\n"
+        "             - int K: The number of clusters.\n"
+        "             - int iter_limit: The maximum number of iterations for the algorithm.\n"
+        "             - int vector_length: The length of each data vector.\n"
+        "             - double epsilon: The convergence criterion for the algorithm.\n"
+        "             - list lst_centroids: A list of initial centroids, where each centroid is represented as a list of doubles.\n"
+        "             - list lst_data_points: A list of data points, where each data point is represented as a list of doubles.\n"
+        "\n"
+        "@return A list of final centroids, where each centroid is represented as a list of doubles. If an error occurs,\n"
+        "         it returns an integer indicating the failure status:\n"
+        "         - 0: Success\n"
+        "         - 1: Error in processing\n"
+        "\n"
+        "@note This function expects to receive valid input types and dimensions as described. The input lists should be\n"
+        "      structured correctly, and all values should be of the expected types to avoid errors.\n"}, /*  The docstring for the function */
         {NULL, NULL, 0, NULL}     /* The last entry must be all NULL as shown to act as a
                                  sentinel. Python looks for this entry to know that all
                                  of the functions for the module have been defined. */
