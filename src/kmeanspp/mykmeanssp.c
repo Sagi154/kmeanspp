@@ -16,7 +16,6 @@ struct cluster
 } ;
 
 int vectors_count, vector_length, iter_limit, K, failure;
-int malloc_count, free_count;
 double epsilon;
 double** vector_array;
 double** initial_centroids;
@@ -29,10 +28,8 @@ void free_memory_of_vectors_array(int vectors_counted)
     for(i = 0; i < vectors_counted; i++)
     {
         free(vector_array[i]);
-        free_count++;
     }
     free(vector_array);
-    free_count++;
 }
 
 void free_memory_of_initial_centroids(int vectors_counted)
@@ -41,10 +38,8 @@ void free_memory_of_initial_centroids(int vectors_counted)
     for(i = 0; i < vectors_counted; i++)
     {
         free(initial_centroids[i]);
-        free_count++;
     }
     free(initial_centroids);
-    free_count++;
 }
 
 void free_memory_of_final_centroids(int vectors_counted)
@@ -53,10 +48,8 @@ void free_memory_of_final_centroids(int vectors_counted)
     for(i = 0; i < vectors_counted; i++)
     {
         free(final_centroids[i]);
-        free_count++;
     }
     free(final_centroids);
-    free_count++;
 }
 
 void free_memory_of_clusters(int clusters_count)
@@ -65,12 +58,9 @@ void free_memory_of_clusters(int clusters_count)
     for(i = 0; i < clusters_count; i++)
     {
         free(clusters[i].centroid);
-        free_count++;
         free(clusters[i].sum);
-        free_count++;
     }
     free(clusters);
-    free_count++;
 }
 
 void copy_vector_by_cord(double* copy_from, double* copy_to)
@@ -91,7 +81,6 @@ int initialize_clusters()
         printf(ERR_MSG);
         return 1;
     }
-    malloc_count++;
     for(i = 0; i < K; i++)
     {
         double* centroid;
@@ -102,17 +91,14 @@ int initialize_clusters()
             free_memory_of_clusters(i);
             return 1;
         }
-        malloc_count++;
         centroid = (double*)calloc(vector_length, sizeof(double));
         if (centroid == NULL) 
         {
             printf(ERR_MSG);
             free(clusters[i].sum);
-            free_count++;
             free_memory_of_clusters(i);
             return 1;
         }
-        malloc_count++;
         copy_vector_by_cord(initial_centroids[i], centroid);
         clusters[i].centroid = centroid;
         clusters[i].vect_length = vector_length;
@@ -131,7 +117,6 @@ int transform_centroids(PyObject *cent_list, double** final_centroids){
         centroid_i =  PyList_New(vector_length);
         if (!PyList_Check(centroid_i)) 
         {
-            printf("Entered if failure in line : %d \n", __LINE__);
             return 1;
         }
         for (j = 0; j < vector_length; j++)
@@ -161,7 +146,6 @@ int create_vector_array(PyObject *lst_data_points)
         printf(ERR_MSG);
         return 1;
     }
-    malloc_count++;
     for (i = 0; i < vectors_count; i++)
     {
         vector_i = (double *)calloc(vector_length, sizeof(double));
@@ -171,7 +155,6 @@ int create_vector_array(PyObject *lst_data_points)
             free_memory_of_vectors_array(i);
             return 1;
         }
-        malloc_count++;
         vect = PyList_GetItem(lst_data_points, i);
         for (j = 0; j < vector_length; j++) 
         {
@@ -196,10 +179,9 @@ int create_initial_centroids(PyObject *lst_centroids)
         printf(ERR_MSG);
         return 1;
     }
-    malloc_count++;
     for (i = 0; i < K; i++)
     {
-        initial_centroids[i] = (double *)calloc(K, sizeof(double));
+        initial_centroids[i] = (double *)calloc(vector_length, sizeof(double));
         if (initial_centroids[i] == NULL) 
         {
             printf(ERR_MSG); 
@@ -207,7 +189,6 @@ int create_initial_centroids(PyObject *lst_centroids)
             free_memory_of_vectors_array(vectors_count);
             return 1;
         }
-        malloc_count++;
         cent = PyList_GetItem(lst_centroids, i);
         if (!PyList_Check(cent)) 
         {
@@ -245,7 +226,6 @@ int turn_clusters_to_centroids()
             free_memory_of_final_centroids(i);
             return 1;
         }
-        malloc_count++;
         copy_vector_by_cord(clusters[i].centroid, final_centroids[i]);
     }
     return 0;
@@ -346,7 +326,6 @@ int k_means()
                 printf(ERR_MSG);
                 return 1;
             }
-            malloc_count++;
             copy_vector_by_cord(clusters[j].centroid, prev_cluster_centroid);
             update_centroid(&clusters[j]);
             if (flag)
@@ -357,8 +336,7 @@ int k_means()
                     flag = 0;
                 }
             }
-            // free(prev_cluster_centroid);
-            // free_count++;
+            free(prev_cluster_centroid);
             reset_sum_and_size(&clusters[j]);
         }
     }
@@ -370,7 +348,6 @@ int activate_kmeans()
     failure = initialize_clusters();
     if (failure)
     {
-        printf("Entered if failure in line : %d \n", __LINE__);
         free_memory_of_initial_centroids(K);
         free_memory_of_vectors_array(vectors_count);
         return 1;
@@ -379,7 +356,6 @@ int activate_kmeans()
     failure = k_means();
     if (failure)
     {
-        printf("Entered if failure in line : %d \n", __LINE__);
         free_memory_of_vectors_array(vectors_count);
         free_memory_of_clusters(K);
         return 1;
@@ -388,16 +364,13 @@ int activate_kmeans()
     final_centroids = (double**)calloc(K, sizeof(double*));
     if (final_centroids == NULL) 
     {
-        printf("Entered if failure in line : %d \n", __LINE__);
         printf(ERR_MSG);
         free_memory_of_clusters(K);
         return 1;
     }
-    malloc_count++;
     failure = turn_clusters_to_centroids();
     if (failure)
     {
-        printf("Entered if failure in line : %d \n", __LINE__);
         free_memory_of_clusters(K);
         return 1;
     }
@@ -429,8 +402,6 @@ static PyObject* fit(PyObject *self, PyObject *args)
     PyObject *lst_centroids;
     PyObject *lst_data_points;
     PyObject *cent_list;
-    malloc_count = 0;
-    free_count = 0;
     if(!PyArg_ParseTuple(args, "iiidOO", &K, &iter_limit, &vector_length, &epsilon, &lst_centroids, &lst_data_points)) 
     {
         return NULL; /* In the CPython API, a NULL value is never valid for a
@@ -450,7 +421,6 @@ static PyObject* fit(PyObject *self, PyObject *args)
     failure = activate_kmeans();
     if (failure)
     {
-        printf("Entered if failure in line : %d \n", __LINE__);
         return Py_BuildValue("i", failure);
     }
     cent_list =  PyList_New(K);
@@ -466,8 +436,6 @@ static PyObject* fit(PyObject *self, PyObject *args)
         return Py_BuildValue("i", failure);
     }
     free_memory_of_final_centroids(K);
-    printf("malloc count is: %d \n", malloc_count);
-    printf("free count is: %d \n", free_count);
     return cent_list; 
 }
 
